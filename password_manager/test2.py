@@ -50,16 +50,23 @@ def parser():
                                metavar='[website/servie]',
                                help='delete credentials of speicfied website/service')
 
+    primary_group.add_argument('-cgp',
+    							'--change_globalpassword',
+    						    action='store_true',
+    							help='change global password')
+
     secondary_group = myparser.add_mutually_exclusive_group()
 
-    secondary_group.add_argument('--generate_password',
+    secondary_group.add_argument('-gp',
+    							'--generate_password',
                                  action='store',
                                  nargs=1,
                                  type=int,
                                  metavar='[password_size]',
                                  help='generate cryptographically secure random password of given size NOTE: used with store_credentials flag')
 
-    secondary_group.add_argument('--generate_password_nosymbol',
+    secondary_group.add_argument('-gpn',
+    							'--generate_password_nosymbol',
                                  action='store',
                                  nargs=1,
                                  type=int,
@@ -257,6 +264,37 @@ def main():
         passkeys=yaml.safe_load(open('passkeys.yml'))
         newpasskeys=delete_credentials(passkeys, args.delete_credentials[0])
         yaml.safe_dump(newpasskeys, open('passkeys.yml', 'w+'))
+
+    elif args.change_globalpassword:
+        if args.generate_password != None or args.generate_password_nosymbol != None:
+            parser0.error('--generate_password and --generate_password_nosymbol are only to be used with -st, --store_credentials arguments')
+
+        if os.path.exists('passkeys.yml') == False or os.path.exists('salt') == False:
+            parser0.error("no existing global paassword to change, you haven't stored any credentials,\n or something is wrong with saved global password")
+
+        passphrase0 = getpass()
+        saltf=open('salt').read().split()
+        salt=b64decode(saltf[0])
+        passhash=saltf[1]
+        thispasshash=hashlib.sha256(passphrase0.encode()).hexdigest()                
+        if passhash != thispasshash:
+            parser0.error('wrong password, please try again, if you have forgotton your global password you can reset it but all your previously stored passwords will be lost')        
+
+        newpassphrase = getpass('new global password: ')
+        newsalt = os.urandom(16)    
+        passkeys=yaml.safe_load(open('passkeys.yml'))
+        newpasskeys={}
+        for i in passkeys.keys():
+        	username_decrypted=decryptpass(passphrase0,salt,passkeys[i]['username'])
+        	password_decrypted=decryptpass(passphrase0,salt,passkeys[i]['password'])
+        	new_username=encryptpass(newpassphrase, newsalt, (username_decrypted).decode())
+        	new_password=encryptpass(newpassphrase, newsalt, (password_decrypted).decode())
+        	newpasskeys.update({i:{'username':new_username.decode(),'password':new_password.decode()}})
+        yaml.safe_dump(newpasskeys, open('passkeys.yml','w+'))
+        saltb64=b64encode(newsalt).decode('utf-8')
+        newsalthash=hashlib.sha256(newpassphrase.encode()).hexdigest()
+        open('salt','w+').write(f'{saltb64}\n{newsalthash}')
+
 
 if __name__ == '__main__':
     main()
