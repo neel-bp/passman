@@ -43,12 +43,12 @@ def parser():
                                action='store_true',
                                help='list all saved credentials')
 
-    primary_group.add_argument('-f',
-                               '--find_credentials',
+    primary_group.add_argument('-del',
+                               '--delete_credentials',
                                action='store',
                                nargs=1,
                                metavar='[website/servie]',
-                               help='display username, encrypted password service name etc in a nice asciitable and also used to check credentials related to given service/website are stored')
+                               help='delete credentials of speicfied website/service')
 
     secondary_group = myparser.add_mutually_exclusive_group()
 
@@ -130,6 +130,10 @@ def plot_table(dict1, table_salt, table_passphrase):
         li.append(password.decode())
         table.append(li)
     print(tabulate(table, headers, tablefmt='fancy_grid'))
+
+def delete_credentials(dict1, service_website):
+    dict1.pop(service_website)
+    return dict1
 
 		
 
@@ -243,8 +247,16 @@ def main():
         passkeys=yaml.safe_load(open('passkeys.yml'))
         plot_table(passkeys, salt, passphrase0)
 
+    elif args.delete_credentials:
+        if args.generate_password != None or args.generate_password_nosymbol != None:
+            parser0.error('--generate_password and --generate_password_nosymbol are only to be used with -st, --store_credentials arguments')
 
+        if os.path.exists('passkeys.yml') == False or os.path.exists('salt') == False:
+            parser0.error("there is nothing to be retrieved, you haven't stored any credentials,\n or something is wrong with saved global password")
 
+        passkeys=yaml.safe_load(open('passkeys.yml'))
+        newpasskeys=delete_credentials(passkeys, args.delete_credentials[0])
+        yaml.safe_dump(newpasskeys, open('passkeys.yml', 'w+'))
 
 if __name__ == '__main__':
     main()
