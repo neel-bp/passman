@@ -145,6 +145,12 @@ def delete_credentials(dict1, service_website):
 		
 
 def main():
+    home=os.path.expanduser('~')
+    if os.path.exists(f'{home}/passkeys/') == False:
+    	os.mkdir(f'{home}/passkeys')
+    else:
+    	pass
+
     parser0 = parser()
 
     if len(sys.argv) == 1:
@@ -178,14 +184,14 @@ def main():
                 pass
             
             passphrase0 = getpass()
-            if os.path.exists('salt') == False:
+            if os.path.exists(f'{home}/passkeys/salt') == False:
                 salt = os.urandom(16)
                 passhash=hashlib.sha256(passphrase0.encode()).hexdigest()
-                f = open('salt', 'w+')
+                f = open(f'{home}/passkeys/salt', 'w+')
                 f.write(f"{b64encode(salt).decode('utf-8')}\n{passhash}")
                 f.close()
-            elif os.path.exists('salt') == True:
-                saltf=open('salt').read().split()
+            elif os.path.exists(f'{home}/passkeys/salt') == True:
+                saltf=open(f'{home}/passkeys/salt').read().split()
                 salt=b64decode(saltf[0])
                 passhash=saltf[1]
                 thispasshash=hashlib.sha256(passphrase0.encode()).hexdigest()                
@@ -198,31 +204,31 @@ def main():
             username_to_store=encryptpass(passphrase0, salt, args.store_credentials[1])
             username_to_store=username_to_store.decode()
 
-            if os.path.exists('passkeys.yml') == False:
+            if os.path.exists(f'{home}/passkeys/passkeys.yml') == False:
                 passkeys={args.store_credentials[0]:{'username':username_to_store,'password':password_to_store}}
-                yaml.safe_dump(passkeys, open('passkeys.yml','w+'))
-            elif os.path.exists('passkeys.yml'):
-                passkeys=yaml.safe_load(open('passkeys.yml'))
+                yaml.safe_dump(passkeys, open(f'{home}/passkeys/passkeys.yml','w+'))
+            elif os.path.exists(f'{home}/passkeys/passkeys.yml'):
+                passkeys=yaml.safe_load(open(f'{home}/passkeys/passkeys.yml'))
                 passkeys[args.store_credentials[0]]={'username':username_to_store, 'password':password_to_store}
-                yaml.safe_dump(passkeys, open('passkeys.yml','w+'))
+                yaml.safe_dump(passkeys, open(f'{home}/passkeys/passkeys.yml','w+'))
 
 
     elif args.retrieve_credentials: 
         if args.generate_password != None or args.generate_password_nosymbol != None:
             parser0.error('--generate_password and --generate_password_nosymbol are only to be used with -st, --store_credentials arguments')
 
-        if os.path.exists('passkeys.yml') == False or os.path.exists('salt') == False:
+        if os.path.exists(f'{home}/passkeys/passkeys.yml') == False or os.path.exists(f'{home}/passkeys/salt') == False:
         	parser0.error("there is nothing to be retrieved, you haven't stored any credentials,\n or something is wrong with saved global password")
 
         passphrase0 = getpass()
-        saltf=open('salt').read().split()
+        saltf=open(f'{home}/passkeys/salt').read().split()
         salt=b64decode(saltf[0])
         passhash=saltf[1]
         thispasshash=hashlib.sha256(passphrase0.encode()).hexdigest()                
         if passhash != thispasshash:
             parser0.error('wrong password, please try again, if you have forgotton your global password you can reset it but all your previously stored passwords will be lost')
 
-        passkeys=yaml.safe_load(open('passkeys.yml'))
+        passkeys=yaml.safe_load(open(f'{home}/passkeys/passkeys.yml'))
         servicename=args.retrieve_credentials[0]
         try:
         	encryptedpassword=passkeys[servicename]['password']
@@ -240,40 +246,40 @@ def main():
         if args.generate_password != None or args.generate_password_nosymbol != None:
             parser0.error('--generate_password and --generate_password_nosymbol are only to be used with -st, --store_credentials arguments')
 
-        if os.path.exists('passkeys.yml') == False or os.path.exists('salt') == False:
+        if os.path.exists(f'{home}/passkeys/passkeys.yml') == False or os.path.exists(f'{home}/passkeys/salt') == False:
             parser0.error("there is nothing to be retrieved, you haven't stored any credentials,\n or something is wrong with saved global password")
 
         passphrase0 = getpass()
-        saltf=open('salt').read().split()
+        saltf=open(f'{home}/passkeys/salt').read().split()
         salt=b64decode(saltf[0])
         passhash=saltf[1]
         thispasshash=hashlib.sha256(passphrase0.encode()).hexdigest()                
         if passhash != thispasshash:
             parser0.error('wrong password, please try again, if you have forgotton your global password you can reset it but all your previously stored passwords will be lost')
 
-        passkeys=yaml.safe_load(open('passkeys.yml'))
+        passkeys=yaml.safe_load(open(f'{home}/passkeys/passkeys.yml'))
         plot_table(passkeys, salt, passphrase0)
 
     elif args.delete_credentials:
         if args.generate_password != None or args.generate_password_nosymbol != None:
             parser0.error('--generate_password and --generate_password_nosymbol are only to be used with -st, --store_credentials arguments')
 
-        if os.path.exists('passkeys.yml') == False or os.path.exists('salt') == False:
+        if os.path.exists(f'{home}/passkeys/passkeys.yml') == False or os.path.exists(f'{home}/passkeys/salt') == False:
             parser0.error("there is nothing to be retrieved, you haven't stored any credentials,\n or something is wrong with saved global password")
 
-        passkeys=yaml.safe_load(open('passkeys.yml'))
+        passkeys=yaml.safe_load(open(f'{home}/passkeys/passkeys.yml'))
         newpasskeys=delete_credentials(passkeys, args.delete_credentials[0])
-        yaml.safe_dump(newpasskeys, open('passkeys.yml', 'w+'))
+        yaml.safe_dump(newpasskeys, open(f'{home}/passkeys/passkeys.yml', 'w+'))
 
     elif args.change_globalpassword:
         if args.generate_password != None or args.generate_password_nosymbol != None:
             parser0.error('--generate_password and --generate_password_nosymbol are only to be used with -st, --store_credentials arguments')
 
-        if os.path.exists('passkeys.yml') == False or os.path.exists('salt') == False:
+        if os.path.exists(f'{home}/passkeys/passkeys.yml') == False or os.path.exists(f'{home}/passkeys/salt') == False:
             parser0.error("no existing global paassword to change, you haven't stored any credentials,\n or something is wrong with saved global password")
 
         passphrase0 = getpass()
-        saltf=open('salt').read().split()
+        saltf=open(f'{home}/passkeys/salt').read().split()
         salt=b64decode(saltf[0])
         passhash=saltf[1]
         thispasshash=hashlib.sha256(passphrase0.encode()).hexdigest()                
@@ -282,7 +288,7 @@ def main():
 
         newpassphrase = getpass('new global password: ')
         newsalt = os.urandom(16)    
-        passkeys=yaml.safe_load(open('passkeys.yml'))
+        passkeys=yaml.safe_load(open(f'{home}/passkeys/passkeys.yml'))
         newpasskeys={}
         for i in passkeys.keys():
         	username_decrypted=decryptpass(passphrase0,salt,passkeys[i]['username'])
@@ -290,10 +296,10 @@ def main():
         	new_username=encryptpass(newpassphrase, newsalt, (username_decrypted).decode())
         	new_password=encryptpass(newpassphrase, newsalt, (password_decrypted).decode())
         	newpasskeys.update({i:{'username':new_username.decode(),'password':new_password.decode()}})
-        yaml.safe_dump(newpasskeys, open('passkeys.yml','w+'))
+        yaml.safe_dump(newpasskeys, open(f'{home}/passkeys/passkeys.yml','w+'))
         saltb64=b64encode(newsalt).decode('utf-8')
         newsalthash=hashlib.sha256(newpassphrase.encode()).hexdigest()
-        open('salt','w+').write(f'{saltb64}\n{newsalthash}')
+        open(f'{home}/passkeys/salt','w+').write(f'{saltb64}\n{newsalthash}')
 
 
 if __name__ == '__main__':
