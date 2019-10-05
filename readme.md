@@ -17,7 +17,7 @@ after successfull installation it should show the following screen in terminal a
 * store passwords in encrypted form
 * lets you display all stored passwords in a pretty table inside ascii
 * generate cryptographically secure passwords with or without symbols<br>
-![passman1](https://raw.githubusercontent.com/neelu0/passman/master/passman1.png)
+![passman1](https://raw.githubusercontent.com/neelu0/passman/master/passman1.PNG)
 
 ## store credentials
 ```
