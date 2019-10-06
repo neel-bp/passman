@@ -35,7 +35,7 @@ def parser():
                                action='store',
                                nargs='+',
                                metavar='[website/service] [username] [password]',
-                               help=''
+                               help='use this argument to store passwords'
                                )
 
     primary_group.add_argument('-l',
