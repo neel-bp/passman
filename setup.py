@@ -1,12 +1,10 @@
 from setuptools import setup
 
-readme = open('readme.md').read()
 
 setup(
    name='passman',
    version='0.1',
    description='simple commandline password manager that uses commandline arguments to do what its meant to do, manage passwords',
-   long_description=readme,
    author='Neelu',
    author_email='neelu0@protonmail.com',
    packages=['passman'],  #same as name
