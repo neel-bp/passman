@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
    name='passman',
-   version='0.2',
+   version='0.3',
    description='simple commandline password manager that uses commandline arguments to do what its meant to do, manage passwords',
    author='Neelu',
    author_email='neelu0@protonmail.com',
