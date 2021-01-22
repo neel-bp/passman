@@ -240,7 +240,10 @@ def main():
         print(f'your credentials for {servicename}: ')
         print(f'username: {username.decode()}')
         print('your password has been copied to clipboard')
-        pyperclip.copy(password_to_print.decode())
+        if os.name == 'posix':
+            os.system(f'echo -n "{password_to_print.decode()} | xlip -selection clipboard"')
+        else:
+            pyperclip.copy(password_to_print.decode())
 
     elif args.list_credentials:
         if args.generate_password != None or args.generate_password_nosymbol != None:
