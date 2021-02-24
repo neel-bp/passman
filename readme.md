@@ -12,6 +12,8 @@ it will install all the dependencies automatically.<br>
 after successfull installation it should show the following screen in terminal after you execute passman from terminal with passman command.<br>
 <Br>
 ![noargument](https://raw.githubusercontent.com/neelu0/passman/master/noargument.PNG)
+  
+ **NOTE:** it uses xclip on GNU/linux
 
 ## Features
 * store passwords in encrypted form
